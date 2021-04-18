@@ -48,7 +48,11 @@ if os.path.exists("/overrides/postfix.cf"):
 if os.path.exists("/overrides/postfix.master"):
     for line in open("/overrides/postfix.master").read().strip().split("\n"):
         if is_valid_postconf_line(line):
-            os.system('postconf -Me "{}"'.format(line))
+            if line.startswith('-'):
+                # Support any of the master.cf related options like -M, -F, -P
+                os.system('postconf "{}"'.format(line))
+            else:
+                os.system('postconf -Me "{}"'.format(line))
 
 for map_file in glob.glob("/overrides/*.map"):
     destination = os.path.join("/etc/postfix", os.path.basename(map_file))
